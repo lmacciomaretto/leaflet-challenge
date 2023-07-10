@@ -1,116 +1,134 @@
+// Function from leaflet - https://leafletjs.com/examples/choropleth/
+function getColor(d) {
+    return d > 21 ? '#800026' :
+        d > 18 ? '#BD0026' :
+        d > 15 ? '#E31A1C' :
+        d > 12 ? '#FC4E2A' :
+        d > 9 ? '#FD8D3C' :
+        d > 6 ? '#FEB24C' :
+        d > 3 ? '#FED976' :
+        '#FFEDA0';
+}
+
 // Define a function we want to run once for each feature in the features array
 // Give each feature a popup describing the place and time of the earthquake
 function popUpMsg(feature, layer) {
-    layer.bindPopup(`<h3>${feature.properties.place}</h3> <hr> <p>Magnitude:${feature.properties.mag}</p> <hr> <p>Depth:${feature.properties.geometry[2]}</p>`);
+    layer.bindPopup("<h3>" + feature.properties.place +
+        "</h3><hr><p>Magnitude: " + feature.properties.mag + "</p>" +
+        "<p>Depth: " + feature.geometry.coordinates[2] + " km</p>" +
+        "<p><a href='" + feature.properties.url + "'>LINK</a></p>");
 }
 
-// Define streetmap and darkmap layers
+// Step 1: Define Tile Layers
+// 1.a: Define streetmap layer
 let streetmap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     tileSize: 512,
     maxZoom: 18,
     zoomOffset: -1
 });
-
+//1.b: Define darkmap layer 
 let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
     maxZoom: 18
 });
 
-// Define a baseMaps object to hold our base layers
+// Step 2. Define Basemaps object to hold our base layers
 let baseMaps = {
     "Street Map": streetmap,
     "Topographic Map": topo
 };
 
-// Define a markerSize() function that will give each point a different radius based on the earthquake magnitude.
-function markerSize(mag) {
-return (mag) * 10;
-}
-
-// Create the layer for earthquakes
-let earthquakes = new L.LayerGroup();
-
-// Loop through locations, and create the city and state markers.
-for (let i = 0; i < data.feature.length; i++) {
-  // Setting the marker radius for the state by passing population into the markerSize function
-  earthquakes.push(
-    L.circle(data.feature[i].properties, {
-      stroke: false,
-      fillOpacity: 0.75,
-      color: "white",
-      fillColor: "white",
-      radius: markerSize(data.feature[i].properties.mag)
-    })
-)};
-
-
-// Create our map, giving it the streetmap and earthquakes layers to display on load.
+// Step 3: Define Leaflet map with default layers included
 let myMap = L.map("map", {
-    center: [-17.78629, -63.18117],
-    zoom: 3.4,
-    layers: [streetmap, earthquakes]
+    center: [-22.492, -66.149],
+    zoom: 3.5,
+    layers: [streetmap]
 });
 
-// Create an overlay object to hold our overlay.
+// Step 4: Add tile layers to the map
+streetmap.addTo(myMap);
+
+// Step 5: Create a layer for the earthquakes
+let earthquakes = new L.LayerGroup();
+
+// Step 6: Create overlay object to hold our overlay layer
 let overlayMaps = {
     Earthquakes: earthquakes
 };
 
-// Create a layer control.
-// Pass it our baseMaps and overlayMaps.
-// Add the layer control to the map.
+// Step 7: Add layer control to the map
 L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
 }).addTo(myMap);
 
-// Store our API endpoint as queryUrl.
-const queryUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query.geojson?starttime=2022-07-04%2000:00:00&endtime=2023-07-04%2023:59:59&maxlatitude=14.264&minlatitude=-57.136&maxlongitude=-33.75&minlongitude=-82.617&minmagnitude=4.5&eventtype=earthquake&orderby=time"
+// Step 8: Store the API endpoint inside queryUrl
+const queryUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query.geojson?starttime=2022-07-04%2000:00:00&endtime=2023-07-04%2023:59:59&maxlatitude=14.264&minlatitude=-57.136&maxlongitude=-33.75&minlongitude=-82.617&minmagnitude=4.5&eventtype=earthquake&orderby=time";
 
-// Perform a GET request to the query URL/
-d3.json(queryUrl).then(function(data) {
-//   // Once we get a response, send the data.features object to the createFeatures function.
-//   createFeatures(data.features);
-
-    // Create a GeoJSON layer that contains the features array on the earthquakeData object.
-    // Run the onEachFeature function once for each piece of data in the array.
+// Step 9: Perform a GET request to the query URL
+d3.json(queryUrl).then(function (data) {
+    // Step 10: Create a GeoJSON layer containing the features array on the earthquakeData object
     L.geoJSON(data, {
-        onEachFeature: popUpMsg,
+        style: function (feature) {
+            return {
+                color: getColor(feature.geometry.coordinates[2])
+            };
+        },
+        pointToLayer: function (feature, latlng) {
+            return new L.CircleMarker(latlng, {
+                radius: feature.properties.mag * 3,
+                fillOpacity: 0.85
+            });
+        },
+        onEachFeature: popUpMsg
     }).addTo(earthquakes);
 
-    earthquakes.addTo(myMap)
-});  
+    // Step 11: Add the layer group to the map
+    earthquakes.addTo(myMap);
 
-// // Call the marker into the styling
-// var geojsonMarkerOptions = {
-//     radius: markerSize(data.features.properties.mag),
-//     fillColor: "#ff7800",
-//     color: "#000",
-//     weight: 1,
-//     opacity: 1,
-//     fillOpacity: 0.8
-// };
+    // Step 12: Create the legend
+    var legend = L.control({ position: 'bottomright' });
 
-//     // Create a new marker cluster group.
-//   let markers = L.markerClusterGroup();
+    // Step 13: Define the legend's onAdd function
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 3, 6, 9, 12, 15, 18, 21],
+            labels = [];
+        div.innerHTML = '<h4>Depth</h4>'; // Add legend title
 
-//   // Loop through the data.
-//   for (let i = 0; i < response.length; i++) {
+        // Loop through the grades and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + ' km<br>' : '+ km');
+        }
 
-//     // Set the data location property to a variable.
-//     let location = response[i].location;
+        return div;
+    };
 
-//     // Check for the location property.
-//     if (location) {
+    // Step 14: Add the legend to the map
+    legend.addTo(myMap);
+});
 
-//       // Add a new marker to the cluster group, and bind a popup.
-//       markers.addLayer(L.marker([location.coordinates[1], location.coordinates[0]])
-//         .bindPopup(response[i].descriptor));
-//     }
+// Step 15: Ensure all data points load in the correct locations
+myMap.on('zoomend', function () {
+    earthquakes.eachLayer(function (layer) {
+        layer._updatePath();
+    });
+});
 
-//   }
+// Other comments and resources
+// https://leafletjs.com/reference-1.7.1.html#geojson-option
+// pointToLayer - change from default marker - see pointToLayer example here https://leafletjs.com/examples/geojson/ especially geojsonMarkerOptions definition; this variable could also be set to the style:; look up examples via google
+// style  - example of use in Day 2 Activity 1; but styles the marker/feature; look up examples in conjunction with pointToLayer
+// onEachFeature - many examples mostly of popups; action that occurs when marker is clicked on the map
+// filter - not used in activites or in the homework
 
-//   // Add our marker cluster layer to the map.
-//   myMap.addLayer(markers).
+// IF there are more data to be added and it is unrelated to first data set then steps 7-9 can be mimicked.
+// Always check the data to see what type of json data it is.  L.geoJson() will map whatever geometries found in a
+// json or geojson file.  If it is a geometry.type of polygon then it will be an enclosed shape; 
+// if it is a Linestring then it will be multiple lines connected, etc.
 
-
+// Just like onEachFeature, there are other options that can be included, see the documentation
+// https://leafletjs.com/reference-1.7.1.html#geojson-option 
+// https://leafletjs.com/examples/geojson/
