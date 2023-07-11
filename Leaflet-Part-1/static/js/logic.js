@@ -54,7 +54,7 @@ let earthquakes = new L.LayerGroup();
 
 // Step 6: Create overlay object to hold our overlay layer
 let overlayMaps = {
-    Earthquakes: earthquakes
+    "Earthquakes": earthquakes
 };
 
 // Step 7: Add layer control to the map
@@ -66,49 +66,54 @@ L.control.layers(baseMaps, overlayMaps, {
 const queryUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query.geojson?starttime=2022-07-04%2000:00:00&endtime=2023-07-04%2023:59:59&maxlatitude=14.264&minlatitude=-57.136&maxlongitude=-33.75&minlongitude=-82.617&minmagnitude=4.5&eventtype=earthquake&orderby=time";
 
 // Step 9: Perform a GET request to the query URL
-d3.json(queryUrl).then(function (data) {
-    // Step 10: Create a GeoJSON layer containing the features array on the earthquakeData object
-    L.geoJSON(data, {
-        style: function (feature) {
-            return {
-                color: getColor(feature.geometry.coordinates[2])
-            };
-        },
-        pointToLayer: function (feature, latlng) {
-            return new L.CircleMarker(latlng, {
-                radius: feature.properties.mag * 3,
-                fillOpacity: 0.85
-            });
-        },
-        onEachFeature: popUpMsg
-    }).addTo(earthquakes);
+fetch(queryUrl)
+    .then(response => response.json())
+    .then(data => {
+        // Step 10: Create a GeoJSON layer containing the features array on the earthquakeData object
+        L.geoJSON(data, {
+            style: function (feature) {
+                return {
+                    color: getColor(feature.geometry.coordinates[2])
+                };
+            },
+            pointToLayer: function (feature, latlng) {
+                return new L.CircleMarker(latlng, {
+                    radius: feature.properties.mag * 3,
+                    fillOpacity: 0.85
+                });
+            },
+            onEachFeature: popUpMsg
+        }).addTo(earthquakes);
 
-    // Step 11: Add the layer group to the map
-    earthquakes.addTo(myMap);
+        // Step 11: Add the layer group to the map
+        earthquakes.addTo(myMap);
 
-    // Step 12: Create the legend
-    var legend = L.control({ position: 'bottomright' });
+        // Step 12: Create the legend
+        var legend = L.control({ position: 'bottomright' });
 
-    // Step 13: Define the legend's onAdd function
-    legend.onAdd = function (map) {
-        var div = L.DomUtil.create('div', 'info legend'),
-            grades = [0, 3, 6, 9, 12, 15, 18, 21],
-            labels = [];
-        div.innerHTML = '<h4>Depth</h4>'; // Add legend title
+        // Step 13: Define the legend's onAdd function
+        legend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend'),
+                grades = [0, 3, 6, 9, 12, 15, 18, 21],
+                labels = [];
+            div.innerHTML = '<h4>Depth</h4>'; // Add legend title
 
-        // Loop through the grades and generate a label with a colored square for each interval
-        for (var i = 0; i < grades.length; i++) {
-            div.innerHTML +=
-            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + ' km<br>' : '+ km');
-        }
+            // Loop through the grades and generate a label with a colored square for each interval
+            for (var i = 0; i < grades.length; i++) {
+                div.innerHTML +=
+                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + ' km<br>' : '+ km');
+            }
 
-        return div;
-    };
+            return div;
+        };
 
-    // Step 14: Add the legend to the map
-    legend.addTo(myMap);
-});
+        // Step 14: Add the legend to the map
+        legend.addTo(myMap);
+    })
+    .catch(error => {
+        console.log('Error:', error);
+    });
 
 // Step 15: Ensure all data points load in the correct locations
 myMap.on('zoomend', function () {
@@ -116,19 +121,3 @@ myMap.on('zoomend', function () {
         layer._updatePath();
     });
 });
-
-// Other comments and resources
-// https://leafletjs.com/reference-1.7.1.html#geojson-option
-// pointToLayer - change from default marker - see pointToLayer example here https://leafletjs.com/examples/geojson/ especially geojsonMarkerOptions definition; this variable could also be set to the style:; look up examples via google
-// style  - example of use in Day 2 Activity 1; but styles the marker/feature; look up examples in conjunction with pointToLayer
-// onEachFeature - many examples mostly of popups; action that occurs when marker is clicked on the map
-// filter - not used in activites or in the homework
-
-// IF there are more data to be added and it is unrelated to first data set then steps 7-9 can be mimicked.
-// Always check the data to see what type of json data it is.  L.geoJson() will map whatever geometries found in a
-// json or geojson file.  If it is a geometry.type of polygon then it will be an enclosed shape; 
-// if it is a Linestring then it will be multiple lines connected, etc.
-
-// Just like onEachFeature, there are other options that can be included, see the documentation
-// https://leafletjs.com/reference-1.7.1.html#geojson-option 
-// https://leafletjs.com/examples/geojson/
