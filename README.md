@@ -19,18 +19,18 @@ In this repository:
 logic.json creates:
 *Base map with street view or topographic view
 Street View
-![Base-Street-Map](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/fb194c29-d15c-4f0d-ac1a-40583cb0c1f5)
+![Base-Street-Map](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/c69f25d9-35af-422d-8f3b-bb39296ba021)
 
 Topographic View
-![Base-Topographic-Map](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/1cdc9a76-f0e6-4a52-b444-bf2a63b3f653)
+![Base-Topographic-Map](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/4fdb392e-2338-4d22-9f14-01b1fc802aa4)
 
 *Choropleth map that overlays and can be turned on and off independently
-![Base-Street-Map-Earthquakes-Overlay](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/7b60b4fc-1827-48c6-9e52-7fd5dd3e4b0d)
+![Base-Street-Map-Earthquakes-Overlay](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/c335577d-a041-4cb8-89c0-a3cff50e45b9)
 
-![Base-Topographic-Map-Earthquakes-Overlay](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/393134e9-f6b2-4137-ac9e-1d77cca6a20a)
+![Base-Topographic-Map-Earthquakes-Overlay](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/153e3d67-2bb3-477d-b1d8-94566d096206)
 
 *Tooltips and layer controls that allow for interactivity.
-![Tooltips-Map](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/ffce6c13-54cd-470f-a5d1-0d3f2c606d1f)
+![Tooltips-Map](https://github.com/lmacciomaretto/leaflet-challenge/assets/126762600/bf765e43-133d-4235-859f-df736780c8dc)
 
 
 ### References
